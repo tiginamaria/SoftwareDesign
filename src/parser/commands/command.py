@@ -7,5 +7,5 @@ class Command:
     def __init__(self, args=None):
         self.args = args
 
-    def execute(self, env: Environment, input: IOStream, output: IOStream):
+    def execute(self, env: Environment, stream: IOStream):
         pass

@@ -7,5 +7,6 @@ class External(Command):
         super().__init__(args)
         self.name = name
 
-    def execute(self, env, input, output):
-        print(input)
+    def execute(self, env, stream):
+        print(stream.read())
+        return 0

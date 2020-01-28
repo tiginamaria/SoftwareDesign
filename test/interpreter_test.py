@@ -1,13 +1,24 @@
 import unittest
 
+from src.environment import Environment
+from src.interpreter.interpreter import Interpreter
+from src.parser.commands.cat import Cat
+from src.parser.commands.echo import Echo
+
 
 class TestStringMethods(unittest.TestCase):
 
     def test_cat(self):
-        pass
+        env = Environment({'cat': '1'})
+        interpreter = Interpreter(env)
+        with open('resources/file.txt', 'r') as f:
+            print(f.read())
+        interpreter.interpret([Cat(['resources/file.txt'])])
 
     def test_echo(self):
-        pass
+        env = Environment({'cat': '1'})
+        interpreter = Interpreter(env)
+        interpreter.interpret([Echo(['\"hello\"'])])
 
     def test_pwd(self):
         pass

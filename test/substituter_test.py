@@ -18,11 +18,17 @@ class TestStringMethods(unittest.TestCase):
         text = substituter.substitute("echo $dog   $cat  rat")
         self.assertEqual("echo 2   1  rat", text)
 
-    def test_substitution_different_quotes(self):
+    def test_substitution_separated_different_quotes(self):
         env = Environment({'cat': '1', 'dog': '2', 'rat': '3'})
         substituter = Substituter(env)
         text = substituter.substitute("echo '$cat'   \"$dog\"  $rat")
         self.assertEqual("echo '$cat'   \"2\"  3", text)
+
+    def test_substitution_different_quotes(self):
+        env = Environment({'cat': '1', 'dog': '2', 'rat': '3'})
+        substituter = Substituter(env)
+        text = substituter.substitute("echo '$cat'\"$dog\"$rat")
+        self.assertEqual("echo '$cat'\"2\"3", text)
 
 
 if __name__ == '__main__':

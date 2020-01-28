@@ -1,7 +1,4 @@
-
 class Token:
-    def __init__(self, args=None):
-        self.args = args
 
-    def to_string(self):
-        return self.args
+    def __init__(self, content=None):
+        self.content = content

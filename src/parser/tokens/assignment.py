@@ -1,8 +1,11 @@
-from src.parser.tokens.terminals import Variable, Argument
+import re
+
 from src.parser.tokens.token import Token
 
 
 class AssignmentToken(Token):
+    Variable = re.compile(r"[_a-zA-Z][_a-zA-Z0-9]*")
 
-    grammar = Variable, "=", Argument
+    Value = re.compile(r"('[^']*'|\"[^\"]*\"|[^\"'|\s]+)*")
 
+    grammar = Variable, "=", Value

@@ -1,9 +1,26 @@
-from pypeg2 import name, blank, maybe_some
+import re
 
-from src.parser.tokens.terminals import Argument
+from pypeg2 import name, some, maybe_some, ignore
+
+from src.parser.tokens.blank import Blank
 from src.parser.tokens.token import Token
 
 
-class CommandToken(Token):
+class DoubleQuotes(Token):
+    grammar = "\"", re.compile(r"[^\"]*"), "\""
 
-    grammar = name(), maybe_some(blank, Argument)
+
+class SingleQuotes(Token):
+    grammar = "\'", re.compile(r"[^']*"), "\'"
+
+
+class NoQuotes(Token):
+    grammar = re.compile(r"[^\"|'\s]+")
+
+
+class Argument(Token):
+    grammar = some([DoubleQuotes, SingleQuotes, NoQuotes])
+
+
+class CommandToken(Token):
+    grammar = name(), maybe_some(ignore(Blank), Argument)

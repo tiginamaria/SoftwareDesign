@@ -12,7 +12,7 @@ class CLI:
     def __init__(self):
         self.env = Environment(os.environ)
         self.pipeline = Pipeline()
-        self.pipeline.add([Substituter(self.env), Parser(), Interpreter()])
+        self.pipeline.add([Substituter(self.env), Parser(), Interpreter(self.env)])
 
     def run(self, input):
         return self.pipeline.run(input)
@@ -22,6 +22,7 @@ if __name__ == "__main__":
     cli = CLI()
     while True:
         inp = input()
+        print(inp)
         code = cli.run(inp)
         if code == -1:
             break

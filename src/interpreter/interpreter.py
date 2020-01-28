@@ -5,16 +5,14 @@ from src.runnable import Runnable
 
 class Interpreter(Runnable):
 
-    def init__(self, env):
+    def __init__(self, env):
         self.env = env
 
     def interpret(self, commands: [Command]):
-        input = IOStream()
-        output = IOStream()
+        stream = IOStream()
         for command in commands:
-            code = command.execute(self.env, input, output)
-            input.clear()
-            input, output = output, input
+            code = command.execute(self.env, stream)
+        print("".join(stream.read()))
 
     def run(self, input):
         self.interpret(input)

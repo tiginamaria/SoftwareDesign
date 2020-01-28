@@ -2,7 +2,6 @@ import re
 
 from pypeg2 import maybe_some
 
-from src.substituter.tokens.blank import Blank
 from src.substituter.tokens.substitution_token import SubstitutionToken
 from src.substituter.tokens.variable_substitution import VariableSubstitution
 
@@ -12,7 +11,7 @@ class StringNoDoubleQuotes(SubstitutionToken):
 
 
 class DoubleQuotes(SubstitutionToken):
-    grammar = "\"", maybe_some(maybe_some(Blank), [StringNoDoubleQuotes, VariableSubstitution]), "\""
+    grammar = "\"", maybe_some([StringNoDoubleQuotes, VariableSubstitution]), "\""
 
     def substitute(self, env):
         for token in self.content:
