@@ -22,7 +22,7 @@ if __name__ == "__main__":
     cli = CLI()
     while True:
         inp = input()
-        print(inp)
-        code = cli.run(inp)
+        code, out = cli.run(inp)
         if code == -1:
             break
+        print(out)

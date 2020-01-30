@@ -1,5 +1,5 @@
-from src.io.stream import IOStream
-from src.parser.commands.command import Command
+from src.interpreter.commands import Command
+from src.io.stream_io import StreamIO
 from src.runnable import Runnable
 
 
@@ -8,11 +8,16 @@ class Interpreter(Runnable):
     def __init__(self, env):
         self.env = env
 
-    def interpret(self, commands: [Command]):
-        stream = IOStream()
-        for command in commands:
-            code = command.execute(self.env, stream)
-        print("".join(stream.read()))
-
     def run(self, input):
-        self.interpret(input)
+        return self.interpret(input)
+
+    def interpret(self, commands: [Command]):
+        input = StreamIO()
+        output = StreamIO()
+        code = 0
+        for command in commands:
+            code = command.execute(self.env, input, output)
+            input.clear()
+            input, output = output, input
+        out = input.read()[0] if len(input.read()) > 0 else None
+        return code, out

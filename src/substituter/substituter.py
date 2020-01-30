@@ -1,9 +1,7 @@
 from pypeg2 import parse, maybe_some
 
 from src.runnable import Runnable
-from src.substituter.tokens.double_quotes import DoubleQuotes
-from src.substituter.tokens.no_quotes import NoQuotes
-from src.substituter.tokens.single_quotes import SingleQuotes
+from src.substituter.tokens import VariableSubstitution, DoubleQuotes, SingleQuotes, NoQuotes
 
 
 class Substituter(Runnable):
@@ -11,12 +9,11 @@ class Substituter(Runnable):
     def __init__(self, env):
         self.env = env
 
+    def run(self, input):
+        return self.substitute(input)
+
     def substitute(self, input: str) -> str:
-        print("substitute")
-        tokens = parse(input, maybe_some([NoQuotes, SingleQuotes, DoubleQuotes]), whitespace="")
+        tokens = parse(input, maybe_some([NoQuotes, SingleQuotes, DoubleQuotes, VariableSubstitution]), whitespace="")
         for token in tokens:
             token.substitute(self.env)
         return "".join(list(map(lambda token: token.to_string(), tokens)))
-
-    def run(self, input):
-        return self.substitute(input)

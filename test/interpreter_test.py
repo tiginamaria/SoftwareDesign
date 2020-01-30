@@ -1,9 +1,8 @@
 import unittest
 
 from src.environment import Environment
+from src.interpreter.commands import Cat, Echo
 from src.interpreter.interpreter import Interpreter
-from src.parser.commands.cat import Cat
-from src.parser.commands.echo import Echo
 
 
 class TestStringMethods(unittest.TestCase):

@@ -1,11 +1,6 @@
 import unittest
 
-from src.parser.commands.cat import Cat
-from src.parser.commands.echo import Echo
-from src.parser.commands.exit import Exit
-from src.parser.commands.external import External
-from src.parser.commands.pwd import Pwd
-from src.parser.commands.wc import Wc
+from src.interpreter.commands import Echo, Cat, Pwd, Exit, Wc, External
 from src.parser.parser import Parser
 
 
@@ -66,7 +61,7 @@ class TestStringMethods(unittest.TestCase):
 
         external = pipe[2]
         self.assertIsInstance(external, External)
-        self.assertEqual({'commit', '-m', 'hello'}, set(external.args))
+        self.assertEqual({'commit', '-m', '\"hello\"'}, set(external.args))
 
         pwd = pipe[3]
         self.assertIsInstance(pwd, Pwd)

@@ -3,8 +3,8 @@ class Environment:
     def __init__(self, env):
         self.env = env
 
-    def set(self, key, value):
+    def __setitem__(self, key, value):
         self.env[key] = value
 
-    def get(self, key):
+    def __getitem__(self, key):
         return self.env.get(key, "")
