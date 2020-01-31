@@ -1,7 +1,7 @@
 import unittest
 
 from src.environment import Environment
-from src.substituter.substituter import Substituter
+from src.substituter.substituter import Substituter, SubstituterException
 
 
 class TestStringMethods(unittest.TestCase):
@@ -29,6 +29,24 @@ class TestStringMethods(unittest.TestCase):
         substituter = Substituter(env)
         text = substituter.substitute("echo '$cat'\"$dog\"$rat")
         self.assertEqual("echo '$cat'\"2\"3", text)
+        text = substituter.substitute("echo $cat$dog$rat")
+        self.assertEqual("echo 123", text)
+
+    def test_substitution_empty_variable(self):
+        env = Environment(dict())
+        substituter = Substituter(env)
+        self.assertRaises(SubstituterException, substituter.substitute, "echo $")
+        self.assertRaises(SubstituterException, substituter.substitute, "echo \"$\"")
+        try:
+            substituter.substitute("echo '$'")
+        except SubstituterException:
+            self.fail("should not raise exception")
+
+    def test_substitution_empty_quotes(self):
+        env = Environment(dict())
+        substituter = Substituter(env)
+        text = substituter.substitute("echo ''\"\"  ")
+        self.assertEqual("echo ''\"\"  ", text)
 
 
 if __name__ == '__main__':

@@ -96,21 +96,19 @@ class Wc(Command):
         with open(file, 'r') as f:
             content = f.read()
             counts = self.str_statistics(content)
-        return '{}  {}\n'.format(counts, file)
+        return '{}  {}'.format(counts, file)
 
     def execute(self, env, input, output):
-        result = ""
+        result = []
         if self.args:
             try:
                 for arg in self.args:
-                    result += self.file_statistics(arg)
+                    result.append(self.file_statistics(arg))
             except IOError as e:
-                CommandException('wc', e)
+                raise CommandException('wc', e)
+            output.write("\n".join(result))
         elif input.read():
-            result = self.str_statistics(input.read())
-        else:
-            result = None
-        output.write(result)
+            output.write(self.str_statistics(input.read()))
         return 0
 
 

@@ -67,7 +67,7 @@ class CommandToken(ParserToken):
 class PipeToken(ParserToken):
     """ Class for pipe expression parser token. """
 
-    grammar = CommandToken, maybe_some(ignore(Blank), "|", ignore(Blank), CommandToken), ignore(Blank)
+    grammar = ignore(Blank), CommandToken, maybe_some(ignore(Blank), "|", ignore(Blank), CommandToken), ignore(Blank)
 
 
 class AssignmentToken(ParserToken):
@@ -75,4 +75,4 @@ class AssignmentToken(ParserToken):
 
     Variable = re.compile(r"[_a-zA-Z][_a-zA-Z0-9]*")
 
-    grammar = Variable, "=", ArgumentToken
+    grammar = ignore(Blank), Variable, "=", ArgumentToken, ignore(Blank)
