@@ -19,9 +19,6 @@ class TestStringMethods(unittest.TestCase):
         interpreter = Interpreter(env)
         interpreter.interpret([Echo(['\"hello\"'])])
 
-    def test_pwd(self):
-        pass
-
     def test_wc(self):
         pass
 

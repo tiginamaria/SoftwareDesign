@@ -1,20 +1,26 @@
 import os
 
 from src.environment import Environment
-from src.interpreter.interpreter import Interpreter
-from src.parser.parser import Parser
+from src.interpreter.interpreter import Interpreter, InterpreterException
+from src.parser.parser import Parser, ParserException
 from src.pipeline import Pipeline
-from src.substituter.substituter import Substituter
+from src.substituter.substituter import Substituter, SubstituterException
 
 
 class CLI:
+    """ Command-line interface for bash single line commands. """
 
     def __init__(self):
+        "Initialise environment and interpretation pipeline for cli. """
         self.env = Environment(os.environ)
         self.pipeline = Pipeline()
         self.pipeline.add([Substituter(self.env), Parser(), Interpreter(self.env)])
 
-    def run(self, input):
+    def run(self, input: str) -> (int, str):
+        """ Run substituter, parser, interpreter one by one.
+        :param input: input string to process
+        :return: cli result
+        """
         return self.pipeline.run(input)
 
 
@@ -22,7 +28,11 @@ if __name__ == "__main__":
     cli = CLI()
     while True:
         inp = input()
-        code, out = cli.run(inp)
+        try:
+            code, out = cli.run(inp)
+        except (InterpreterException, ParserException, SubstituterException) as e:
+            code, out = 1, e
         if code == -1:
             break
-        print(out)
+        if out is not None:
+            print(out)

@@ -1,18 +1,22 @@
 class StreamIO:
+    """ Class to store transitional result for commands in pipe. """
 
     def __init__(self):
-        self.stream = []
+        """ Initialise io stream. """
+        self.stream = None
 
-    def write(self, values):
-        self.stream = []
-        self.stream.append(values)
+    def write(self, string: str):
+        """ Write given string into stream.
+        :param string: string to store
+        """
+        self.stream = string
 
     def read(self):
+        """ Read string from stream.
+        :return: stored string
+        """
         return self.stream
 
-    def append(self, values):
-        assert values is not None
-        self.stream.append(values)
-
     def clear(self):
-        self.stream = []
+        """ Clear stream. """
+        self.stream = None

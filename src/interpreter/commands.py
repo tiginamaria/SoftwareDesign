@@ -6,13 +6,17 @@ from src.io.stream_io import StreamIO
 
 
 class CommandException(Exception):
-    pass
+    """ Exception raises in case of wrong command behaviour. """
+
+    def __init__(self, name, message):
+        super(CommandException, self).__init__("{}: {}".format(name, message))
 
 
 class Command:
     """ Base abstract class to emulate bash commands."""
 
     def __init__(self, args=None):
+        """ Initialise arguments. """
         self.args = args
 
     def execute(self, env: Environment, input: StreamIO, output: StreamIO) -> int:
@@ -30,10 +34,6 @@ class Assignment(Command):
     """ Class emulate bash assignment - add new variable to environment."""
 
     def execute(self, env, input, output):
-        """ Execute assignment command: add new variable to environment. """
-
-        assert self.args == 2, "illegal argument exception, expected two arguments," \
-                               " got {}: {}".format(len(self.args), self.args)
         variable, value = self.args
         env[variable] = value
         return 0
@@ -50,15 +50,15 @@ class Cat(Command):
                     with open(file, "r") as f:
                         result += f.read()
             except IOError as e:
-                raise CommandException('cat: {}'.format(e))
+                raise CommandException('cat', e)
         else:
-            result = "".join(input.read())
+            result = input.read()
         output.write(result)
         return 0
 
 
 class Echo(Command):
-    """ Class emulate bash command cat - concatenate files and print on the standard output. """
+    """" Class emulate bash command echo - display a line of text. """
 
     def execute(self, env, input, output):
         if self.args:
@@ -69,13 +69,14 @@ class Echo(Command):
 
 
 class Exit(Command):
-    """ Class emulate bash command echo - display a line of text. """
+    """ Class emulate bash command exit - cause normal process termination. """
 
     def execute(self, env, input, output):
         return -1
 
 
 class Pwd(Command):
+    """ Class for bash command pwd - print name of current/working directory. """
 
     def execute(self, env, input, output):
         output.write(os.getcwd())
@@ -83,7 +84,7 @@ class Pwd(Command):
 
 
 class Wc(Command):
-    """ Class for bash command wc - print newline, word, and byte counts for each file """
+    """ Class for bash command wc - print newline, word, and byte counts for each file. """
 
     def str_statistics(self, text):
         lines = len(text.split('\n'))
@@ -100,35 +101,36 @@ class Wc(Command):
     def execute(self, env, input, output):
         result = ""
         if self.args:
-            for arg in self.args:
-                try:
+            try:
+                for arg in self.args:
                     result += self.file_statistics(arg)
-                except IOError as e:
-                    CommandException('wc : {}'.format(e))
+            except IOError as e:
+                CommandException('wc', e)
+        elif input.read():
+            result = self.str_statistics(input.read())
         else:
-            if len(input.read()) == 0:
-                return 1
-            result = self.str_statistics(input.read()[0])
+            result = None
         output.write(result)
         return 0
 
 
 class External(Command):
+    """ Class for bash external command - execute command in new subprocess. """
 
     def __init__(self, name, args):
         super().__init__(args)
         self.name = name
 
     def execute(self, env, input, output):
-        encoded_input = " ".join(input.read()).encode() if input else None
+        if not self.args:
+            self.args = []
         try:
-            if not self.args:
-                self.args = []
-            result = subprocess.run([self.name] + self.args, check=True, input=encoded_input,
-                                    stdout=subprocess.PIPE, stderr=subprocess.PIPE)
-        except subprocess.CalledProcessError as error:
-            raise CommandException(error.stderr.decode())
-        except FileNotFoundError:
-            raise CommandException('{}: command not found'.format(self.name))
-        output.write(result.stdout.decode())
-        return 0
+            process = subprocess.Popen([self.name] + self.args, universal_newlines=True,
+                                       stdin=subprocess.PIPE, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+            out, err = process.communicate(input.read())
+            if len(err) != 0:
+                raise CommandException('external', err)
+            output.write(out.strip())
+        except (subprocess.SubprocessError, FileExistsError, FileNotFoundError) as e:
+            raise CommandException('external', e)
+        return process.returncode
