@@ -23,16 +23,15 @@ class CLI:
         """
         return self.pipeline.run(input)
 
-
-if __name__ == "__main__":
-    cli = CLI()
-    while True:
-        inp = input()
-        try:
-            code, out = cli.run(inp)
-        except (InterpreterException, ParserException, SubstituterException) as e:
-            code, out = 1, e
-        if code == -1:
-            break
-        if out is not None:
-            print(out)
+    def start(self):
+        """ Read and process command from stdio. """
+        while True:
+            inp = input()
+            try:
+                code, out = self.run(inp)
+            except (InterpreterException, ParserException, SubstituterException) as e:
+                code, out = 1, e
+            if code == -1:
+                break
+            if out is not None:
+                print(out)
