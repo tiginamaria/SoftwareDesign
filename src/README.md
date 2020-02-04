@@ -35,7 +35,7 @@ exit
 
 1) **CLI** reads the input from command line and delegate it's interpretation to **Pipeline** object. 
 2) Class Pipeline use pipeline pattern to run **Substituter**, **Parser** and **Interpreter** in sequence so as to give the output of previous phase as input for the next phase.
-3) **Substituter** splits the input sting to tokens **VariableSubstitution**, **NoQuotes**, **SingleQuotes**, **DoubleQuotes**, process substitution of **VariableSubstitution** and concatenate the result into single string. All varibales stores in **Environment** object.
+3) **Substituter** splits the input sting to tokens **VariableSubstitution**, **NoQuotes**, **SingleQuotes**, **DoubleQuotes**, process substitution of **VariableSubstitution** and concatenate the result into single string. All varibales stores in **Environment** object. To parse tokens I use [pyPEG](https://fdik.org/pyPEG/) libary.
 ```python
 NoQuotes = '[^$'"]*'
 SingleQuotes = '[^']*'
@@ -53,5 +53,8 @@ PipeToken = CommandToken (|CommandToken)*
 AssignmentToken = Variable=ArgumentToken
 Variable = [_a-zA-Z][_a-zA-Z0-9]*
 ```
-To parse tokens I used [pyPEG](https://fdik.org/pyPEG/) libary.
-5) **Interpreter** execute list of **ExecutableCommand** one by one giving outpur_stream as input_stream for every next command. **ExecutableCommand** object is abstact calss for all commands (**Cat**, **Echo**, ...) which has .execute(). Every command is given outpur_stream, input_stream and return code meaning status o execution.
+5) **Interpreter** execute list of **ExecutableCommand** one by one giving outpur_stream as input_stream for every next command. **ExecutableCommand** object is abstact calss for all commands (**Cat**, **Echo**, ...) which has .execute(). Every command is given outpur_stream, input_stream and return code meaning status of execution.
+
+6) Output and retur code of last command returns to CLI and writes to command line.
+
+![Class diagram](https://raw.githubusercontent.com/wiki/tiginamaria/SoftwareDesign/images/CLI_class.png)
