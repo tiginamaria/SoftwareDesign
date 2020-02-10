@@ -4,6 +4,7 @@ import unittest
 
 from src.cli import CLI
 from src.interpreter.interpreter import InterpreterException
+from src.parser.command_factory import ArgumentParserException
 from src.parser.parser import ParserException
 from src.substituter.substituter import SubstituterException
 
@@ -13,6 +14,10 @@ class TestStringMethods(unittest.TestCase):
         self.file1 = "test/resources/text1"
         self.file2 = "test/resources/text2"
         self.non_existent_file = "test/resources/text3"
+        self.file_grep_A = "test/resources/text_grep_A"
+        self.file_grep_w = "test/resources/text_grep_w_i"
+        self.file_grep_i = "test/resources/text_grep_w_i"
+        self.file_grep_all = "test/resources/text_grep_A_w_i"
 
     def test_cat(self):
         cli = CLI()
@@ -101,6 +106,22 @@ class TestStringMethods(unittest.TestCase):
     def test_external_exception(self):
         cli = CLI()
         self.assertRaises(InterpreterException, cli.run, "git lol")
+
+    def test_grep(self):
+        cli = CLI()
+        self.assertIsNone(cli.run("echo | grep abc")[1])
+        self.assertEqual('cat\ndog\ncat cat\ncatdog\nRat', cli.run("grep -A 3 cat {}".format(self.file_grep_A))[1])
+        self.assertEqual('dog\ncat cat\ndog rat\nrat\ndog\ncatdog\n', cli.run("grep -A 2 dog {}"
+                                                                              .format(self.file_grep_A))[1])
+        self.assertEqual('dog rat\nrat\n', cli.run("grep rat {}".format(self.file_grep_A))[1])
+        self.assertEqual('cat, dog!\n', cli.run("grep -w cat {}".format(self.file_grep_w))[1])
+        self.assertEqual('cat, dog!\ncaTCaT\nHELLO, CAT.', cli.run("grep -i cat {}".format(self.file_grep_i))[1])
+        self.assertEqual('cat, dog!\ndoGgg\ncAT. dog\nno...dogs\nHELLO, CAT.', cli.run("grep -A 2 -i -w cat {}"
+                                                                                       .format(self.file_grep_all))[1])
+
+    def test_grep_exception(self):
+        cli = CLI()
+        self.assertRaises(ArgumentParserException, cli.run, "grep")
 
 
 if __name__ == '__main__':

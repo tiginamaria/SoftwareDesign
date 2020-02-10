@@ -1,5 +1,21 @@
-from src.interpreter.commands import Command, Cat, Echo, Exit, Pwd, Wc, External, Assignment
+import argparse
+
+from src.interpreter.commands import Command, Cat, Echo, Exit, Pwd, Wc, External, Assignment, Grep
 from src.parser.tokens import ArgumentToken
+
+
+class ArgumentParserException(Exception):
+    """ Exception raise in case of wrong argument parsing process. """
+
+    def __init__(self, message):
+        super(ArgumentParserException, self).__init__("parser: {}".format(message))
+
+
+class ArgumentParser(argparse.ArgumentParser):
+    """ Class to parse flags. """
+
+    def error(self, message):
+        raise ArgumentParserException(message)
 
 
 class CommandFactory:
@@ -10,6 +26,7 @@ class CommandFactory:
         self.commands_creators = {'cat': self.create_cat,
                                   'echo': self.create_echo,
                                   'exit': self.create_exit,
+                                  'grep': self.create_grep,
                                   'pwd': self.create_pwd,
                                   'wc': self.create_wc}
 
@@ -70,3 +87,18 @@ class CommandFactory:
         """ Create assignment command. """
         args = [args[0]] + self.create_args([args[1]])
         return Assignment(args)
+
+    def create_grep(self, arg_tokens) -> Grep:
+        """ Create grep command. """
+        parser = ArgumentParser()
+        parser.add_argument("-i", action='store_true',
+                            help="Ignore case distinctions.")
+        parser.add_argument("-w", action='store_true',
+                            help="Select only those lines containing matches that form whole words.")
+        parser.add_argument("-A", type=int, default=1,
+                            help="Print NUM lines of trailing context after matching lines.")
+        parser.add_argument('pattern', type=str, help='Pattern to grep')
+        parser.add_argument('files', type=str, nargs='*', help='File(s) to grep')
+        args = self.create_args(arg_tokens)
+        flags = parser.parse_args(args)
+        return Grep(flags)

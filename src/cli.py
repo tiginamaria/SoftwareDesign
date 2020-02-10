@@ -2,6 +2,7 @@ import os
 
 from src.environment import Environment
 from src.interpreter.interpreter import Interpreter, InterpreterException
+from src.parser.command_factory import ArgumentParserException
 from src.parser.parser import Parser, ParserException
 from src.pipeline import Pipeline
 from src.substituter.substituter import Substituter, SubstituterException
@@ -29,7 +30,7 @@ class CLI:
             inp = input()
             try:
                 code, out = self.run(inp)
-            except (InterpreterException, ParserException, SubstituterException) as e:
+            except (InterpreterException, ParserException, SubstituterException, ArgumentParserException) as e:
                 code, out = 1, e
             if code == -1:
                 break

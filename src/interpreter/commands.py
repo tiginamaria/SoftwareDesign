@@ -1,4 +1,5 @@
 import os
+import re
 import subprocess
 
 from src.environment import Environment
@@ -80,6 +81,48 @@ class Pwd(Command):
 
     def execute(self, env, input, output):
         output.write(os.getcwd())
+        return 0
+
+
+class Grep(Command):
+    """ Class for bash command grep - print lines matching a pattern. """
+
+    def search(self, pattern, line):
+        if self.args.w:
+            pattern = "\\b" + pattern + "\\b"
+        if self.args.i:
+            return re.search(pattern, line, re.IGNORECASE)
+        return re.search(pattern, line)
+
+    def grep_file(self, text):
+        result = []
+        matched = -1
+        for n, line in enumerate(text):
+            if n > matched:
+                if self.search(self.args.pattern, line):
+                    result.append(line)
+                    matched = n + self.args.A - 1
+            else:
+                result.append(line)
+        return ''.join(result)
+
+    def execute(self, env, input, output):
+        result = []
+        if len(self.args.files) > 0:
+            for file in self.args.files:
+                try:
+                    with open(file) as f:
+                        matched_lines = self.grep_file(f)
+                    if matched_lines:
+                        result.append(matched_lines)
+                except IOError as e:
+                    raise CommandException('grep', e)
+            output.write(''.join(result))
+        elif input.read():
+            matched_lines = self.grep_file(input.read().split('\n'))
+            if matched_lines:
+                result.append(matched_lines)
+            output.write('\n'.join(result))
         return 0
 
 
