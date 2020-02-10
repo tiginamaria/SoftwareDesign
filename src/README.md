@@ -33,16 +33,16 @@ exit
 ## Architecture
 ![Data flow diagram](https://raw.githubusercontent.com/wiki/tiginamaria/SoftwareDesign/images/CLI.png)
 
-1) **CLI** reads the input from command line and delegate it's interpretation to **Pipeline** object. 
+1) **CLI** read the input from command line and delegate input interpretation to **Pipeline** object. 
 2) Class Pipeline use pipeline pattern to run **Substituter**, **Parser** and **Interpreter** in sequence so as to give the output of previous phase as input for the next phase.
-3) **Substituter** splits the input sting to tokens **VariableSubstitution**, **NoQuotes**, **SingleQuotes**, **DoubleQuotes**, process substitution of **VariableSubstitution** and concatenate the result into single string. All varibales stores in **Environment** object. To parse tokens I use [pyPEG](https://fdik.org/pyPEG/) libary.
+3) **Substituter** split the input sting to tokens **VariableSubstitution**, **NoQuotes**, **SingleQuotes**, **DoubleQuotes**, process substitution of **VariableSubstitution** and concatenate the result into single string. All variables stores in **Environment** object. To parse tokens I use [pyPEG](https://fdik.org/pyPEG/) library.
 ```python
 NoQuotes = '[^$'"]*'
 SingleQuotes = '[^']*'
 DoubleQuotes = "[[^$"]+|VariableSubstitution]*"
 VariableSubstitution = $[_a-zA-Z][_a-zA-Z0-9]*
 ```
-4) **Parser** splits input from **Substituter** to tokens **PipeToken**, **AssignmentToken** and delegate building of **ExecutableCommand** from **AssignmentToken** and **CommandToken** to **CommandFactory**.
+4) **Parser** split input from **Substituter** to tokens **PipeToken**, **AssignmentToken** and delegate building of **ExecutableCommand** from **AssignmentToken** and **CommandToken** to **CommandFactory**.
 ```python
 NoQuotes = '[^'"]*'
 SingleQuotes = '[^']*'
@@ -53,8 +53,8 @@ PipeToken = CommandToken (|CommandToken)*
 AssignmentToken = Variable=ArgumentToken
 Variable = [_a-zA-Z][_a-zA-Z0-9]*
 ```
-5) **Interpreter** execute list of **ExecutableCommand** one by one giving outpur_stream as input_stream for every next command. **ExecutableCommand** object is abstact calss for all commands (**Cat**, **Echo**, ...) which has .execute(). Every command is given outpur_stream, input_stream and return code meaning status of execution.
+5) **Interpreter** execute list of **ExecutableCommand** one by one giving output_stream as input_stream for every next command. **ExecutableCommand** object is abstract class for all commands (**Cat**, **Echo**, ...) which has .execute(). Every command is given output_stream, input_stream and return code meaning status of execution.
 
-6) Output and retur code of last command returns to CLI and writes to command line.
+6) Output and return code of last command are returned to CLI and writen to command line.
 
 ![Class diagram](https://raw.githubusercontent.com/wiki/tiginamaria/SoftwareDesign/images/CLI_class.png)
