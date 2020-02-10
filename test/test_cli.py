@@ -110,6 +110,8 @@ class TestStringMethods(unittest.TestCase):
     def test_grep(self):
         cli = CLI()
         self.assertIsNone(cli.run("echo | grep abc")[1])
+        self.assertEqual('1  1  3', cli.run("echo abc | grep abc | wc")[1])
+        self.assertEqual('abc', cli.run("echo abc | grep '^a.*$'")[1])
         self.assertEqual('cat\ndog\ncat cat\ncatdog\nRat', cli.run("grep -A 3 cat {}".format(self.file_grep_A))[1])
         self.assertEqual('dog\ncat cat\ndog rat\nrat\ndog\ncatdog\n', cli.run("grep -A 2 dog {}"
                                                                               .format(self.file_grep_A))[1])
