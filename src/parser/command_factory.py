@@ -1,4 +1,4 @@
-from src.interpreter.commands import Command, Cat, Echo, Exit, Pwd, Wc, External, Assignment
+from src.interpreter.commands import ExecutableCommand, Cat, Echo, Exit, Pwd, Wc, External, Assignment
 from src.parser.tokens import ArgumentToken
 
 
@@ -13,7 +13,7 @@ class CommandFactory:
                          'pwd': Pwd,
                          'wc': Wc}
 
-    def create(self, name: str, arg_tokens: [ArgumentToken]) -> Command:
+    def create(self, name: str, arg_tokens: [ArgumentToken]) -> ExecutableCommand:
         """ Create command with given name and arguments.
         :param name: command name
         :param arg_tokens: command's arguments
@@ -43,12 +43,12 @@ class CommandFactory:
         args = [args[0]] + self.create_args([args[1]])
         return Assignment(args)
 
-    def create_base(self, command, arg_tokens) -> Command:
+    def create_base(self, command, arg_tokens) -> ExecutableCommand:
         """ Create assignment command. """
         args = self.create_args(arg_tokens)
         return command(args)
 
-    def create_external(self, name, arg_tokens) -> Command:
+    def create_external(self, name, arg_tokens) -> ExecutableCommand:
         """ Create assignment command. """
         args = self.create_args(arg_tokens, lambda arg: arg.to_string())
         return External(name, args)

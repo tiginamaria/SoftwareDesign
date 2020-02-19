@@ -5,14 +5,14 @@ from src.environment import Environment
 from src.io.stream_io import StreamIO
 
 
-class CommandException(Exception):
+class ExecutableCommandException(Exception):
     """ Exception raises in case of wrong command behaviour. """
 
     def __init__(self, name, message):
-        super(CommandException, self).__init__("{}: {}".format(name, message))
+        super(ExecutableCommandException, self).__init__("{}: {}".format(name, message))
 
 
-class Command:
+class ExecutableCommand:
     """ Base abstract class to emulate bash commands."""
 
     def __init__(self, args=None):
@@ -30,7 +30,7 @@ class Command:
         pass
 
 
-class Assignment(Command):
+class Assignment(ExecutableCommand):
     """ Class emulate bash assignment - add new variable to environment."""
 
     def execute(self, env, input, output):
@@ -39,7 +39,7 @@ class Assignment(Command):
         return 0
 
 
-class Cat(Command):
+class Cat(ExecutableCommand):
     """ Class emulate bash command cat - concatenate files and print on the standard output. """
 
     def execute(self, env, input, output):
@@ -50,14 +50,14 @@ class Cat(Command):
                     with open(file, "r") as f:
                         result += f.read()
             except IOError as e:
-                raise CommandException('cat', e)
+                raise ExecutableCommandException('cat', e)
         else:
             result = input.read()
         output.write(result)
         return 0
 
 
-class Echo(Command):
+class Echo(ExecutableCommand):
     """" Class emulate bash command echo - display a line of text. """
 
     def execute(self, env, input, output):
@@ -68,14 +68,14 @@ class Echo(Command):
         return 0
 
 
-class Exit(Command):
+class Exit(ExecutableCommand):
     """ Class emulate bash command exit - cause normal process termination. """
 
     def execute(self, env, input, output):
         return -1
 
 
-class Pwd(Command):
+class Pwd(ExecutableCommand):
     """ Class for bash command pwd - print name of current/working directory. """
 
     def execute(self, env, input, output):
@@ -83,7 +83,7 @@ class Pwd(Command):
         return 0
 
 
-class Wc(Command):
+class Wc(ExecutableCommand):
     """ Class for bash command wc - print newline, word, and byte counts for each file. """
 
     def str_statistics(self, text):
@@ -105,14 +105,14 @@ class Wc(Command):
                 for arg in self.args:
                     result.append(self.file_statistics(arg))
             except IOError as e:
-                raise CommandException('wc', e)
+                raise ExecutableCommandException('wc', e)
             output.write("\n".join(result))
         elif input.read():
             output.write(self.str_statistics(input.read()))
         return 0
 
 
-class External(Command):
+class External(ExecutableCommand):
     """ Class for bash external command - execute command in new subprocess. """
 
     def __init__(self, name, args):
@@ -127,8 +127,8 @@ class External(Command):
                                        stdin=subprocess.PIPE, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
             out, err = process.communicate(input.read())
             if len(err) != 0:
-                raise CommandException('external', err)
+                raise ExecutableCommandException('external', err)
             output.write(out.strip())
         except (subprocess.SubprocessError, FileExistsError, FileNotFoundError) as e:
-            raise CommandException('external', e)
+            raise ExecutableCommandException('external', e)
         return process.returncode

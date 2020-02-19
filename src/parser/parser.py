@@ -1,6 +1,6 @@
 from pypeg2 import parse
 
-from src.interpreter.commands import Command
+from src.interpreter.commands import ExecutableCommand
 from src.parser.command_factory import CommandFactory
 from src.parser.tokens import AssignmentToken, PipeToken
 from src.pipeline import Runnable
@@ -20,11 +20,11 @@ class Parser(Runnable):
         """ Initialize command factory for all supported commands. """
         self.command_factory = CommandFactory()
 
-    def run(self, input: str) -> [Command]:
+    def run(self, input: str) -> [ExecutableCommand]:
         """ Run parser on given inputz. """
         return self.parse(input)
 
-    def parse(self, input: str) -> [Command]:
+    def parse(self, input: str) -> [ExecutableCommand]:
         """ Parse input string to list of executable commands.
         :param input: string to parse
         :return: list of commands parsed from input string
