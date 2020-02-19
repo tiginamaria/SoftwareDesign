@@ -14,6 +14,7 @@ class ParserException(Exception):
 
 
 class Parser(Runnable):
+    """ Class for parsing string into command objects. """
 
     def __init__(self):
         """ Initialize command factory for all supported commands. """
