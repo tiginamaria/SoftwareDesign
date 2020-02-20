@@ -50,6 +50,14 @@ class TestStringMethods(unittest.TestCase):
         cli = CLI()
         self.assertRaises(InterpreterException, cli.run, "wc {}".format(self.non_existent_file))
 
+    def test_cd(self):
+        cli = CLI()
+        self.assertEqual(None, cli.run("cd")[1])
+
+    def test_ls(self):
+        cli = CLI()
+        self.assertEqual("text1\ntext2", cli.run(f'ls {os.getcwd() + "/test/resources"}')[1])
+
     def test_assignment(self):
         cli = CLI()
         self.assertEqual(0, cli.run("x=123")[0])

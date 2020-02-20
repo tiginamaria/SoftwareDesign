@@ -1,9 +1,10 @@
 import os
 import subprocess
 import unittest
+from pathlib import Path
 
 from src.environment import Environment
-from src.interpreter.commands import Cat, Echo, Wc, External, Pwd, Assignment
+from src.interpreter.commands import Cat, Echo, Wc, External, Pwd, Assignment, Cd, Ls
 from src.interpreter.interpreter import Interpreter, InterpreterException
 
 
@@ -158,6 +159,76 @@ class InterpreterTests(unittest.TestCase):
         code, output = interpreter.interpret([Echo(['cat', 'dog']), Wc(None), Cat(None)])
         self.assertEqual(0, code)
         self.assertEqual('1  2  7', output)
+
+    def test_cd_without_args(self):
+        interpreter = Interpreter(Environment(dict()))
+        code, output = interpreter.interpret([Cd(), Pwd()])
+        self.assertEqual(0, code)
+        self.assertEqual(str(Path.home()), output)
+
+    def test_cd_with_existing_arg(self):
+        interpreter = Interpreter(Environment(dict()))
+        old_directory = os.getcwd()
+        code, output = interpreter.interpret([Cd(['test/resources']), Pwd()])
+        self.assertEqual(0, code)
+        self.assertEqual(old_directory + '/test/resources', output)
+
+    def test_cd_ignores_pipe(self):
+        interpreter = Interpreter(Environment(dict()))
+        old_directory = os.getcwd()
+        code, output = interpreter.interpret([Echo(['test/resources']), Cd(), Pwd()])
+        self.assertEqual(0, code)
+        self.assertEqual(old_directory, output)
+
+    def test_cd_to_parent(self):
+        interpreter = Interpreter(Environment(dict()))
+        old_directory = os.getcwd()
+        code, output = interpreter.interpret([Cd(['test/resources']), Cd(['..']), Pwd()])
+        self.assertEqual(0, code)
+        self.assertEqual(old_directory, output)
+
+    def test_cd_with_many_args(self):
+        interpreter = Interpreter(Environment(dict()))
+        self.assertRaises(InterpreterException, interpreter.interpret, [Cd(['test/resources', '..'])])
+
+    def test_cd_with_absolute_path(self):
+        interpreter = Interpreter(Environment(dict()))
+        old_directory = os.getcwd()
+        code, output = interpreter.interpret([Cd([old_directory + '/test/resources']), Pwd()])
+        self.assertEqual(0, code)
+        self.assertEqual(old_directory + '/test/resources', output)
+
+    def test_ls_no_arg(self):
+        interpreter = Interpreter(Environment(dict()))
+        code, output = interpreter.interpret([Cd(['test/resources']), Ls()])
+        self.assertEqual(0, code)
+        self.assertEqual('\n'.join(['text1', 'text2']), output)
+
+    def test_ls_one_arg(self):
+        interpreter = Interpreter(Environment(dict()))
+        code, output = interpreter.interpret([Ls(['test/resources'])])
+        self.assertEqual(0, code)
+        self.assertEqual('\n'.join(['text1', 'text2']), output)
+
+    def test_ls_from_pipe(self):
+        interpreter = Interpreter(Environment(dict()))
+        code, output = interpreter.interpret([Echo(['test/resources']), Ls()])
+        self.assertEqual(0, code)
+        self.assertEqual('\n'.join(['text1', 'text2']), output)
+
+    def test_ls_several_args(self):
+        interpreter = Interpreter(Environment(dict()))
+        code, output = interpreter.interpret([Ls(['test/resources', 'test/resources'])])
+        self.assertEqual(0, code)
+        self.assertEqual('\n'.join(['text1', 'text2', 'text1', 'text2']), output)
+
+    def test_ls_ignores_several_args_from_pipe(self):
+        interpreter = Interpreter(Environment(dict()))
+        code, output = interpreter.interpret([Cd(['test/resources']),
+                                              Echo(['test', 'test']),
+                                              Ls()])
+        self.assertEqual(0, code)
+        self.assertEqual('\n'.join(['text1', 'text2']), output)
 
 
 if __name__ == '__main__':
