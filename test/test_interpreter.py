@@ -9,10 +9,15 @@ from src.interpreter.interpreter import Interpreter, InterpreterException
 
 
 class InterpreterTests(unittest.TestCase):
+    @classmethod
+    def setUpClass(self):
+        self.origin_dir = os.getcwd()
+
     def setUp(self):
         self.file1 = "test/resources/text1"
         self.file2 = "test/resources/text2"
         self.non_existent_file = "test/resources/text3"
+        os.chdir(self.origin_dir)
 
     def test_cat_one_arg(self):
         interpreter = Interpreter(Environment(dict()))
@@ -184,7 +189,7 @@ class InterpreterTests(unittest.TestCase):
         old_directory = os.getcwd()
         code, output = interpreter.interpret([Cd(['test/resources']), Cd(['..']), Pwd()])
         self.assertEqual(0, code)
-        self.assertEqual(old_directory, output)
+        self.assertEqual(old_directory + '/test', output)
 
     def test_cd_with_many_args(self):
         interpreter = Interpreter(Environment(dict()))
@@ -201,25 +206,25 @@ class InterpreterTests(unittest.TestCase):
         interpreter = Interpreter(Environment(dict()))
         code, output = interpreter.interpret([Cd(['test/resources']), Ls()])
         self.assertEqual(0, code)
-        self.assertEqual('\n'.join(['text1', 'text2']), output)
+        self.assertSetEqual({'text1', 'text2'}, set(output.split('\n')))
 
     def test_ls_one_arg(self):
         interpreter = Interpreter(Environment(dict()))
         code, output = interpreter.interpret([Ls(['test/resources'])])
         self.assertEqual(0, code)
-        self.assertEqual('\n'.join(['text1', 'text2']), output)
+        self.assertSetEqual({'text1', 'text2'}, set(output.split('\n')))
 
     def test_ls_from_pipe(self):
         interpreter = Interpreter(Environment(dict()))
         code, output = interpreter.interpret([Echo(['test/resources']), Ls()])
         self.assertEqual(0, code)
-        self.assertEqual('\n'.join(['text1', 'text2']), output)
+        self.assertSetEqual({'text1', 'text2'}, set(output.split('\n')))
 
     def test_ls_several_args(self):
         interpreter = Interpreter(Environment(dict()))
         code, output = interpreter.interpret([Ls(['test/resources', 'test/resources'])])
         self.assertEqual(0, code)
-        self.assertEqual('\n'.join(['text1', 'text2', 'text1', 'text2']), output)
+        self.assertEqual(['text1', 'text2', 'text1', 'text2'], output.split('\n'))
 
     def test_ls_ignores_several_args_from_pipe(self):
         interpreter = Interpreter(Environment(dict()))
@@ -227,7 +232,7 @@ class InterpreterTests(unittest.TestCase):
                                               Echo(['test', 'test']),
                                               Ls()])
         self.assertEqual(0, code)
-        self.assertEqual('\n'.join(['text1', 'text2']), output)
+        self.assertSetEqual({'text1', 'text2'}, set(output.split('\n')))
 
 
 if __name__ == '__main__':

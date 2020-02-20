@@ -9,10 +9,15 @@ from src.substituter.substituter import SubstituterException
 
 
 class TestStringMethods(unittest.TestCase):
+    @classmethod
+    def setUpClass(self):
+        self.origin_dir = os.getcwd()
+
     def setUp(self):
         self.file1 = "test/resources/text1"
         self.file2 = "test/resources/text2"
         self.non_existent_file = "test/resources/text3"
+        os.chdir(self.origin_dir)
 
     def test_cat(self):
         cli = CLI()
