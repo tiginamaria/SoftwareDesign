@@ -61,7 +61,8 @@ class TestStringMethods(unittest.TestCase):
 
     def test_ls(self):
         cli = CLI()
-        self.assertEqual("text1\ntext2", cli.run(f'ls {os.getcwd() + "/test/resources"}')[1])
+        output = cli.run(f'ls {os.getcwd() + "/test/resources"}')[1]
+        self.assertSetEqual({'text1', 'text2'}, set(output.split('\n')))
 
     def test_assignment(self):
         cli = CLI()

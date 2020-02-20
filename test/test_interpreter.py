@@ -224,7 +224,8 @@ class InterpreterTests(unittest.TestCase):
         interpreter = Interpreter(Environment(dict()))
         code, output = interpreter.interpret([Ls(['test/resources', 'test/resources'])])
         self.assertEqual(0, code)
-        self.assertEqual(['text1', 'text2', 'text1', 'text2'], output.split('\n'))
+        self.assertSetEqual({'text1', 'text2'}, set(output.split('\n')[:2]))
+        self.assertSetEqual({'text1', 'text2'}, set(output.split('\n')[2:]))
 
     def test_ls_ignores_several_args_from_pipe(self):
         interpreter = Interpreter(Environment(dict()))
