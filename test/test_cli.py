@@ -9,10 +9,15 @@ from src.substituter.substituter import SubstituterException
 
 
 class TestStringMethods(unittest.TestCase):
+    @classmethod
+    def setUpClass(self):
+        self.origin_dir = os.getcwd()
+
     def setUp(self):
         self.file1 = "test/resources/text1"
         self.file2 = "test/resources/text2"
         self.non_existent_file = "test/resources/text3"
+        os.chdir(self.origin_dir)
 
     def test_cat(self):
         cli = CLI()
@@ -49,6 +54,15 @@ class TestStringMethods(unittest.TestCase):
     def test_wc_exception(self):
         cli = CLI()
         self.assertRaises(InterpreterException, cli.run, "wc {}".format(self.non_existent_file))
+
+    def test_cd(self):
+        cli = CLI()
+        self.assertEqual(None, cli.run("cd")[1])
+
+    def test_ls(self):
+        cli = CLI()
+        output = cli.run(f'ls {os.getcwd() + "/test/resources"}')[1]
+        self.assertSetEqual({'text1', 'text2'}, set(output.split('\n')))
 
     def test_assignment(self):
         cli = CLI()

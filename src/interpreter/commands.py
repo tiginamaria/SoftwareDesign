@@ -1,5 +1,6 @@
 import os
 import subprocess
+from pathlib import Path
 
 from src.environment import Environment
 from src.io.stream_io import StreamIO
@@ -17,7 +18,10 @@ class ExecutableCommand:
 
     def __init__(self, args=None):
         """ Initialise arguments. """
-        self.args = args
+        if args:
+            self.args = args
+        else:
+            self.args = []
 
     def execute(self, env: Environment, input: StreamIO, output: StreamIO) -> int:
         """ Execute command.
@@ -110,6 +114,60 @@ class Wc(ExecutableCommand):
         elif input.read():
             output.write(self.str_statistics(input.read()))
         return 0
+
+
+class Cd(ExecutableCommand):
+    """ Class for bash command cd - change the current/working directory. """
+
+    def execute(self, env, input, output):
+        if len(self.args) > 1:
+            raise ExecutableCommandException('cd', 'too many arguments')
+
+        if self.args:
+            path = self.args[0]
+        else:
+            # change to the home directory by default
+            path = str(Path.home())
+
+        try:
+            os.chdir(path)
+        except OSError as e:
+            raise ExecutableCommandException('cd', e)
+        return 0
+
+
+class Ls(ExecutableCommand):
+    """
+    Class for bash command ls - list all files and directories in the given directory (directories).
+    Uses the current/working directory if no arguments are passes.
+    """
+
+    def execute(self, env, input, output):
+        paths = self.get_paths(input)
+        result = []
+        try:
+            for directory in paths:
+                file_names = os.listdir(directory)
+                if file_names:
+                    result.extend(file_names)
+            output.write('\n'.join(result))
+        except OSError as e:
+            raise ExecutableCommandException('ls', e)
+        return 0
+
+    def get_paths(self, input):
+        paths = self.args
+        if not self.args:
+            from_input = input.read()
+            if not from_input:
+                from_input = ''
+            input_args = from_input.split()
+            if len(input_args) == 1:
+                paths = [input_args[0]]
+            else:
+                # use the current directory by default
+                paths = [os.getcwd()]
+        return paths
 
 
 class External(ExecutableCommand):

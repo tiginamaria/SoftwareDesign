@@ -1,4 +1,4 @@
-from src.interpreter.commands import ExecutableCommand, Cat, Echo, Exit, Pwd, Wc, External, Assignment
+from src.interpreter.commands import ExecutableCommand, Cat, Echo, Exit, Pwd, Wc, External, Assignment, Cd, Ls
 from src.parser.tokens import ArgumentToken
 
 
@@ -11,7 +11,9 @@ class CommandFactory:
                          'echo': Echo,
                          'exit': Exit,
                          'pwd': Pwd,
-                         'wc': Wc}
+                         'wc': Wc,
+                         'cd': Cd,
+                         'ls': Ls}
 
     def create(self, name: str, arg_tokens: [ArgumentToken]) -> ExecutableCommand:
         """ Create command with given name and arguments.
