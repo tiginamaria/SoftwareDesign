@@ -175,10 +175,9 @@ class InterpreterTests(unittest.TestCase):
 
     def test_cd_ignores_pipe(self):
         interpreter = Interpreter(Environment(dict()))
-        old_directory = os.getcwd()
         code, output = interpreter.interpret([Echo(['test/resources']), Cd(), Pwd()])
         self.assertEqual(0, code)
-        self.assertEqual(old_directory, output)
+        self.assertEqual(str(Path.home()), output)
 
     def test_cd_to_parent(self):
         interpreter = Interpreter(Environment(dict()))
