@@ -28,7 +28,7 @@ class TestStringMethods(unittest.TestCase):
         self.assertTrue(len(pipe) == 1)
         pwd = pipe[0]
         self.assertIsInstance(pwd, Pwd)
-        self.assertIsNone(pwd.args)
+        self.assertEqual([], pwd.args)
 
     def test_parse_exit_command(self):
         parser = Parser()
@@ -36,7 +36,7 @@ class TestStringMethods(unittest.TestCase):
         self.assertTrue(len(pipe) == 1)
         exit = pipe[0]
         self.assertIsInstance(exit, Exit)
-        self.assertIsNone(exit.args)
+        self.assertEqual([], exit.args)
 
     def test_parse_wc_command(self):
         parser = Parser()
@@ -75,7 +75,7 @@ class TestStringMethods(unittest.TestCase):
 
         wc = pipe[2]
         self.assertIsInstance(wc, Wc)
-        self.assertIsNone(wc.args)
+        self.assertEqual([], wc.args)
 
     def test_parse_pipe_all_tokens(self):
         parser = Parser()
@@ -98,19 +98,19 @@ class TestStringMethods(unittest.TestCase):
 
         pwd = pipe[3]
         self.assertIsInstance(pwd, Pwd)
-        self.assertIsNone(pwd.args)
+        self.assertEqual([], pwd.args)
 
         wc = pipe[4]
         self.assertIsInstance(wc, Wc)
-        self.assertIsNone(wc.args)
+        self.assertEqual([], wc.args)
 
         ls = pipe[5]
         self.assertIsInstance(ls, Ls)
-        self.assertIsNone(ls.args)
+        self.assertEqual([], ls.args)
 
         cd = pipe[6]
         self.assertIsInstance(cd, Cd)
-        self.assertIsNone(cd.args)
+        self.assertEqual([], cd.args)
 
 
 if __name__ == '__main__':
