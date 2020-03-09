@@ -31,8 +31,8 @@ class Substituter(Runnable):
         try:
             tokens = parse(input, maybe_some([NoQuotes, SingleQuotes, DoubleQuotes, VariableSubstitution]),
                            whitespace="")
-        except (SyntaxError, ValueError, TypeError) as e:
-            raise SubstituterException("can not process substitution: {}".format(e))
+        except (SyntaxError, ValueError, TypeError):
+            raise SubstituterException("can not process substitution")
         for token in tokens:
             token.substitute(self.env)
         return "".join(list(map(lambda token: token.to_string(), tokens)))

@@ -7,10 +7,9 @@ cat - concatenate files and print on the standard output
 wc - print newline, word, and byte counts for each file
 pwd - print name of current/working directory
 exit - cause normal process termination
-grep - - print lines matching a pattern
 external - all another command, but via running bush 
 
-Also combinations of this commands - pipelines (ex. echo line | wc), variable substitution (ex. cat $filename)
+Also combinations of these commands - pipelines (ex. echo line | wc), variable substitution (ex. cat $filename)
 and variable assignment (ex. x=3)
 ```
 ## Usage
@@ -34,16 +33,16 @@ exit
 ## Architecture
 ![Data flow diagram](https://raw.githubusercontent.com/wiki/tiginamaria/SoftwareDesign/images/CLI.png)
 
-1) **CLI** read the input from command line and delegate input interpretation to **Pipeline** object. 
-2) Class Pipeline use pipeline pattern to run **Substituter**, **Parser** and **Interpreter** in sequence so as to give the output of previous phase as input for the next phase.
-3) **Substituter** split the input sting to tokens **VariableSubstitution**, **NoQuotes**, **SingleQuotes**, **DoubleQuotes**, process substitution of **VariableSubstitution** and concatenate the result into single string. All variables stores in **Environment** object. To parse tokens I use [pyPEG](https://fdik.org/pyPEG/) library.
+1) **CLI** reads the input from command line and delegates input interpretation to **Pipeline** object. 
+2) Class Pipeline uses pipeline pattern to run **Substituter**, **Parser** and **Interpreter** in sequence so as to give the output of previous phase as input for the next phase.
+3) **Substituter** splits the input sting to tokens **VariableSubstitution**, **NoQuotes**, **SingleQuotes**, **DoubleQuotes**, processes substitution of **VariableSubstitution** and concatenates the result into single string. All variables stores in **Environment** object. To parse tokens I use [pyPEG](https://fdik.org/pyPEG/) library.
 ```python
 NoQuotes = '[^$'"]*'
 SingleQuotes = '[^']*'
 DoubleQuotes = "[[^$"]+|VariableSubstitution]*"
 VariableSubstitution = $[_a-zA-Z][_a-zA-Z0-9]*
 ```
-4) **Parser** split input from **Substituter** to tokens **PipeToken**, **AssignmentToken** and delegate building of **ExecutableCommand** from **AssignmentToken** and **CommandToken** to **CommandFactory**.
+4) **Parser** splits input from **Substituter** to tokens **PipeToken**, **AssignmentToken** and delegates building of **ExecutableCommand** from **AssignmentToken** and **CommandToken** to **CommandFactory**.
 ```python
 NoQuotes = '[^'"]*'
 SingleQuotes = '[^']*'
@@ -54,21 +53,8 @@ PipeToken = CommandToken (|CommandToken)*
 AssignmentToken = Variable=ArgumentToken
 Variable = [_a-zA-Z][_a-zA-Z0-9]*
 ```
-5) In **CommandFactory** there are parsers for every command. To parser flags for command ```grep``` I used [argparse](https://docs.python.org/2/library/argparse.html) library because it allowed me to:
-    * Parse flags from list of content(strings) from **AssignmentToken** into an object with fields, where I put flags' values 
-    * Parse simple flags (grep -w -i n)
-    * Parse flags with parameters (grep -A n)
-    * Parse list of arguments (grep "some pattern" file1 file2 file3)
-    * Throw an exception is case of wrong input parameters
-    
-    I preferred this library to others because:
-    * [optparse](https://docs.python.org/2/library/optparse.html) is deprecated and can not parse flags with arguments
-    * [click](https://click.palletsprojects.com/en/7.x/) is too complicated for my task
-    * [docopt](https://github.com/docopt/docopt) has very unfriendly interface to use 
-    
-6) **Interpreter** execute list of **ExecutableCommand** one by one giving output_stream as input_stream for every next command. **ExecutableCommand** object is abstract class for all commands (**Cat**, **Echo**, ...) which has .execute(). Every command is given output_stream, input_stream and return code meaning status of execution.
+5) **Interpreter** executes list of **ExecutableCommand** one by one giving output_stream as input_stream for every next command. **ExecutableCommand** object is abstract class for all commands (**Cat**, **Echo**, ...) which has .execute(). Every command is given output_stream, input_stream and return code meaning status of execution.
 
-7) Pair of Output and return code of last command is returned to CLI and writen to command line.
-
+6) Output and return code of last command are returned to CLI and writen to command line.
 
 ![Class diagram](https://raw.githubusercontent.com/wiki/tiginamaria/SoftwareDesign/images/CLI_class.png)
