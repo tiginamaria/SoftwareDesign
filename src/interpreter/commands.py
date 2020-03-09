@@ -1,4 +1,5 @@
 import os
+import re
 import subprocess
 
 from src.environment import Environment
@@ -83,7 +84,7 @@ class Pwd(ExecutableCommand):
         return 0
 
 
-class Grep(Command):
+class Grep(ExecutableCommand):
     """ Class for bash command grep - print lines matching a pattern. """
 
     def search(self, pattern, line):
@@ -115,7 +116,7 @@ class Grep(Command):
                     if matched_lines:
                         result.append(matched_lines)
                 except IOError as e:
-                    raise CommandException('grep', e)
+                    raise ExecutableCommandException('grep', e)
             output.write(''.join(result))
         elif input.read():
             matched_lines = self.grep_file(input.read().split('\n'))

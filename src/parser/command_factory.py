@@ -1,4 +1,6 @@
-from src.interpreter.commands import Command, Cat, Echo, Exit, Pwd, Wc, External, Assignment
+import argparse
+
+from src.interpreter.commands import ExecutableCommand, Cat, Echo, Exit, Pwd, Wc, Grep, External, Assignment
 from src.parser.tokens import ArgumentToken
 
 
@@ -21,11 +23,12 @@ class CommandFactory:
 
     def __init__(self):
         """ Initialize functions to create standard commands. """
-        self.commands_creators = {'cat': self.create_cat,
-                                  'echo': self.create_echo,
-                                  'exit': self.create_exit,
-                                  'pwd': self.create_pwd,
-                                  'wc': self.create_wc}
+        self.commands = {'cat': Cat,
+                         'echo': Echo,
+                         'exit': Exit,
+                         'pwd': Pwd,
+                         'wc': Wc,
+                         'grep': Grep}
 
     def create(self, name: str, arg_tokens: [ArgumentToken]) -> ExecutableCommand:
         """ Create command with given name and arguments.
@@ -36,6 +39,8 @@ class CommandFactory:
         command = self.commands.get(name, External)
         if command == External:
             return self.create_external(name, arg_tokens)
+        if command == Grep:
+            return self.create_grep(arg_tokens)
         return self.create_base(command, arg_tokens)
 
     @staticmethod
@@ -67,7 +72,7 @@ class CommandFactory:
         args = self.create_args(arg_tokens, lambda arg: arg.to_string())
         return External(name, args)
 
-    def create_grep(self, arg_tokens) -> Grep:
+    def create_grep(self, arg_tokens) -> ExecutableCommand:
         """ Create grep command. """
         parser = ArgumentParser()
         parser.add_argument("-i", action='store_true',
