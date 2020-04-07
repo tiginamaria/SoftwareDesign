@@ -74,12 +74,19 @@ class CommandFactory:
 
     def create_grep(self, arg_tokens) -> ExecutableCommand:
         """ Create grep command. """
+
+        def positive(value):
+            ivalue = int(value)
+            if ivalue <= 0:
+                raise argparse.ArgumentTypeError("Expected positive value, got %s" % value)
+            return ivalue
+
         parser = ArgumentParser()
         parser.add_argument("-i", action='store_true',
                             help="Ignore case distinctions.")
         parser.add_argument("-w", action='store_true',
                             help="Select only those lines containing matches that form whole words.")
-        parser.add_argument("-A", type=int, default=1,
+        parser.add_argument("-A", type=positive, default=1,
                             help="Print NUM lines of trailing context after matching lines.")
         parser.add_argument('pattern', type=str, help='Pattern to grep')
         parser.add_argument('files', type=str, nargs='*', help='File(s) to grep')
