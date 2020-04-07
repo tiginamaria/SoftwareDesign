@@ -1,9 +1,10 @@
 import os
 import subprocess
 import unittest
+from argparse import Namespace
 
 from src.environment import Environment
-from src.interpreter.commands import Cat, Echo, Wc, External, Pwd, Assignment
+from src.interpreter.commands import Cat, Echo, Wc, External, Pwd, Assignment, Grep
 from src.interpreter.interpreter import Interpreter, InterpreterException
 
 
@@ -11,6 +12,10 @@ class InterpreterTests(unittest.TestCase):
     def setUp(self):
         self.file1 = "test/resources/text1"
         self.file2 = "test/resources/text2"
+        self.file_grep_A = "test/resources/text_grep_A"
+        self.file_grep_w = "test/resources/text_grep_w_i"
+        self.file_grep_i = "test/resources/text_grep_w_i"
+        self.file_grep_all = "test/resources/text_grep_A_w_i"
         self.non_existent_file = "test/resources/text3"
 
     def test_cat_one_arg(self):
@@ -98,6 +103,66 @@ class InterpreterTests(unittest.TestCase):
     def test_wc_exception(self):
         interpreter = Interpreter(Environment(dict()))
         self.assertRaises(InterpreterException, interpreter.interpret, [Wc([self.file1, self.non_existent_file])])
+
+    def test_grep_A_flag(self):
+        interpreter = Interpreter(Environment(dict()))
+        namespace = Namespace()
+        namespace.__setattr__('A', 3)
+        namespace.__setattr__('i', False)
+        namespace.__setattr__('w', False)
+        namespace.__setattr__('pattern', 'cat')
+        namespace.__setattr__('files', [self.file_grep_A])
+        code, output = interpreter.interpret([Grep(namespace)])
+        self.assertEqual(0, code)
+        self.assertEqual('cat\ndog\ncat cat\ncatdog\nRat', output)
+
+        namespace.__setattr__('A', 2)
+        namespace.__setattr__('pattern', 'dog')
+        code, output = interpreter.interpret([Grep(namespace)])
+        self.assertEqual(0, code)
+        self.assertEqual('dog\ncat cat\ndog rat\nrat\ndog\ncatdog\n', output)
+
+        namespace.__setattr__('A', 1)
+        namespace.__setattr__('pattern', 'rat')
+        code, output = interpreter.interpret([Grep(namespace)])
+        self.assertEqual(0, code)
+        self.assertEqual('dog rat\nrat\n', output)
+
+    def test_grep_w_flag(self):
+        interpreter = Interpreter(Environment(dict()))
+        namespace = Namespace()
+        namespace.__setattr__('A', 1)
+        namespace.__setattr__('i', False)
+        namespace.__setattr__('w', True)
+        namespace.__setattr__('pattern', 'cat')
+        namespace.__setattr__('files', [self.file_grep_w])
+        code, output = interpreter.interpret([Grep(namespace)])
+        self.assertEqual(0, code)
+        self.assertEqual('cat, dog!\n', output)
+
+    def test_grep_i_flag(self):
+        interpreter = Interpreter(Environment(dict()))
+        namespace = Namespace()
+        namespace.__setattr__('A', 1)
+        namespace.__setattr__('i', True)
+        namespace.__setattr__('w', False)
+        namespace.__setattr__('pattern', 'cat')
+        namespace.__setattr__('files', [self.file_grep_i])
+        code, output = interpreter.interpret([Grep(namespace)])
+        self.assertEqual(0, code)
+        self.assertEqual('cat, dog!\ncaTCaT\nHELLO, CAT.', output)
+
+    def test_grep_all_flags(self):
+        interpreter = Interpreter(Environment(dict()))
+        namespace = Namespace()
+        namespace.__setattr__('A', 2)
+        namespace.__setattr__('i', True)
+        namespace.__setattr__('w', True)
+        namespace.__setattr__('pattern', 'cat')
+        namespace.__setattr__('files', [self.file_grep_all])
+        code, output = interpreter.interpret([Grep(namespace)])
+        self.assertEqual(0, code)
+        self.assertEqual('cat, dog!\ndoGgg\ncAT. dog\nno...dogs\nHELLO, CAT.', output)
 
     def test_wc_no_arg(self):
         interpreter = Interpreter(Environment(dict()))

@@ -1,5 +1,21 @@
-from src.interpreter.commands import ExecutableCommand, Cat, Echo, Exit, Pwd, Wc, External, Assignment
+import argparse
+
+from src.interpreter.commands import ExecutableCommand, Cat, Echo, Exit, Pwd, Wc, Grep, External, Assignment
 from src.parser.tokens import ArgumentToken
+
+
+class ArgumentParserException(Exception):
+    """ Exception raise in case of wrong argument parsing process. """
+
+    def __init__(self, message):
+        super(ArgumentParserException, self).__init__("parser: {}".format(message))
+
+
+class ArgumentParser(argparse.ArgumentParser):
+    """ Class to parse flags. """
+
+    def error(self, message):
+        raise ArgumentParserException(message)
 
 
 class CommandFactory:
@@ -11,7 +27,8 @@ class CommandFactory:
                          'echo': Echo,
                          'exit': Exit,
                          'pwd': Pwd,
-                         'wc': Wc}
+                         'wc': Wc,
+                         'grep': Grep}
 
     def create(self, name: str, arg_tokens: [ArgumentToken]) -> ExecutableCommand:
         """ Create command with given name and arguments.
@@ -22,6 +39,8 @@ class CommandFactory:
         command = self.commands.get(name, External)
         if command == External:
             return self.create_external(name, arg_tokens)
+        if command == Grep:
+            return self.create_grep(arg_tokens)
         return self.create_base(command, arg_tokens)
 
     @staticmethod
@@ -52,3 +71,25 @@ class CommandFactory:
         """ Create assignment command. """
         args = self.create_args(arg_tokens, lambda arg: arg.to_string())
         return External(name, args)
+
+    def create_grep(self, arg_tokens) -> ExecutableCommand:
+        """ Create grep command. """
+
+        def positive(value):
+            ivalue = int(value)
+            if ivalue <= 0:
+                raise argparse.ArgumentTypeError("Expected positive value, got %s" % value)
+            return ivalue
+
+        parser = ArgumentParser()
+        parser.add_argument("-i", action='store_true',
+                            help="Ignore case distinctions.")
+        parser.add_argument("-w", action='store_true',
+                            help="Select only those lines containing matches that form whole words.")
+        parser.add_argument("-A", type=positive, default=1,
+                            help="Print NUM lines of trailing context after matching lines.")
+        parser.add_argument('pattern', type=str, help='Pattern to grep')
+        parser.add_argument('files', type=str, nargs='*', help='File(s) to grep')
+        args = self.create_args(arg_tokens)
+        flags = parser.parse_args(args)
+        return Grep(flags)
